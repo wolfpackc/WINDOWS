@@ -79,7 +79,7 @@ Group SIDs:
 
 ---
 
-# 🔐 ¿Por qué son tan importantes los Group SIDs?
+#  ¿Por qué son tan importantes los Group SIDs?
 
 Porque casi nunca se dan permisos a usuarios individuales.
 
@@ -105,7 +105,7 @@ Si la respuesta es sí → acceso concedido.
 
 ---
 
-# 🧠 Flujo mental sencillo
+#  Flujo mental sencillo
 
 Cuando intentas abrir algo:
 
@@ -125,7 +125,7 @@ Si alguno coincide → acceso permitido.
 
 ---
 
-# 🎮 Ejemplo tipo videojuego
+#  Ejemplo tipo videojuego
 
 Personaje = Token
 Nombre del personaje = User SID
@@ -150,10 +150,6 @@ No importa tu nombre.
 
 ---
 
-# 🧠 Frase para memorizar
+#  Frase para memorizar
 
 **Windows no mira nombres. Mira SIDs.**
-
----
-
-Si quieres, el siguiente paso natural es explicarte **qué es una DACL y cómo usa esos SIDs**, que es donde todo encaja.
