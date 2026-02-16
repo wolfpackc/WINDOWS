@@ -10,6 +10,7 @@
 
 ### 🔹 Preguntas rápidas
 
+* [ ] ¿token primario es lo mismo que token de acceso?
 * [ ] ¿puedo crear un token yo mismo?
 * [ ] ¿Qué es un token de acceso?
 * [ ] ¿Qué información contiene un token?
