@@ -9,6 +9,7 @@
 ## 🧠 Tema: Tokens de Acceso
 
 ### 🔹 Preguntas rápidas
+* [ ] ¿que me dices de un proceso con un token de acceso y que le pasa a los hilos de ese proceso?
 
 * [ ] ¿token primario es lo mismo que token de acceso?
 * [ ] ¿puedo crear un token yo mismo?
