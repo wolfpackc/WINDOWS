@@ -3,13 +3,6 @@
 
 > Archivo de autoevaluación personal sobre Windows Internals, Tokens, Procesos, Privilegios y Elevación.
 
----
-
-## 📌 Estado
-
-* [ ] Tema iniciado
-* [ ] Tema comprendido
-* [ ] Tema dominado
 
 ---
 
