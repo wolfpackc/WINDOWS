@@ -1,5 +1,5 @@
 
-# 🧩 ¿Qué es un SID?
+#  ¿Qué es un SID?
 
 SID = **Security Identifier**
 Es un número único que Windows usa para identificar:
@@ -18,13 +18,13 @@ Tú nunca trabajas con esto a mano normalmente. Windows sí.
 
 ---
 
-# 👤 User SID (SID de usuario)
+#  User SID (SID de usuario)
 
 Es el **SID que representa a tu usuario concreto**.
 
 Piensa:
 
-👉 “Este soy yo”
+ “Este soy yo”
 
 Ejemplo mental:
 
@@ -43,11 +43,11 @@ User SID = S-1-5-21-AAA-AAA-AAA-1001
 
 Windows sabe:
 
-👉 Este token pertenece a Eduardo.
+ Este token pertenece a Eduardo.
 
 ---
 
-# 👥 Group SIDs (SIDs de grupo)
+#  Group SIDs (SIDs de grupo)
 
 Son los grupos a los que perteneces.
 
