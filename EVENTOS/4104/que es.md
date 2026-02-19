@@ -1,6 +1,3 @@
-Exacto, estás hablando de **el evento 4104 de PowerShell**, que forma parte de **Script Block Logging**. Te lo explico paso a paso y con precisión:
-
----
 
 ### 1️⃣ ¿Qué es Script Block Logging?
 
@@ -53,9 +50,3 @@ Exacto, estás hablando de **el evento 4104 de PowerShell**, que forma parte de 
 * No previene la ejecución; solo **registra lo que pasa**.
 * Puede generar **muchos eventos**, lo que aumenta el volumen de logs.
 * Si un script genera código dinámico en tiempo de ejecución, se registrará **solo el bloque final que PowerShell interpreta**, no la intención original del atacante.
-
----
-
-Si quieres, puedo hacerte un **diagrama rápido del flujo exacto de un evento 4104**, desde que un script ofuscado llega a PowerShell hasta que termina registrado en el log. Eso hace mucho más visual cómo funciona.
-
-¿Quieres que lo haga?
