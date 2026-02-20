@@ -7,3 +7,7 @@ con una herramienta conocida como JIT se coge el lenguaje intermedio y lo compil
 Genera código nativo en memoria (RAM) que el proceso ejecuta.
 
 Cuando el programa se cierra, ese código desaparece.
+
+
+
+Un dato interesante es que aunque necesitemos compiladores distintos para cada lenguaje de prog, el runtime(clr) es capaz de coger e interpretar todos los los lenguajes intermedios que reciba
