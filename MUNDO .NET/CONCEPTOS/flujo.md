@@ -60,3 +60,41 @@ IL (.exe / .dll)
    ↓ Runtime (CLR)
 Código nativo → CPU ejecuta
 ```
+Exactamente ✅, esa es la idea central. Pero vamos a afinarla un poco para que no quede ninguna confusión.
+
+---
+
+# 🔹 .NET Framework / .NET Core / .NET 5+
+
+Cuando hablamos de **cualquiera de estas plataformas**, estamos hablando de **mucho más que solo el compilador JIT**.
+
+* Cada una es **una plataforma completa**, que incluye:
+
+  1. **Runtime (el CLR o CoreCLR)** → la “caja de herramientas” que mencionas
+
+     * **JIT compiler** → convierte IL a código nativo en memoria
+     * Garbage Collector (GC) → gestiona la memoria
+     * Loader de ensamblados → carga librerías y tus `.exe/.dll`
+     * Verificación y seguridad → comprueba que el IL es válido
+     * Manejo de excepciones, hilos, etc.
+  2. **Librerías base (BCL)** → clases listas para usar (`System.IO`, `System.Net`, etc.)
+  3. **Herramientas y utilidades** → solo en el SDK (para compilar, publicar, etc.)
+
+---
+
+# 🔹 Resumen mental sencillo
+
+* **IL portable** → generado por el compilador de C# / F#
+* **Runtime (CLR / CoreCLR)** → convierte IL a código nativo y gestiona la ejecución
+* **JIT** → es un componente dentro del runtime, no algo externo
+* **SDK** → incluye runtime + compiladores + herramientas para desarrollo
+
+En otras palabras:
+
+> Cuando dices “Net Core” o “Net Framework”, estás hablando de **la plataforma completa**, y dentro de ella está la **caja de herramientas (runtime/CLR)** donde vive el JIT.
+
+---
+
+Si quieres, puedo dibujarte un **diagrama visual muy simple** que muestre exactamente cómo fluye:
+
+**Código C# → Compilador → IL → Runtime (con JIT) → Código nativo → CPU**
