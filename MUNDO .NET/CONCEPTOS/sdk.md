@@ -14,3 +14,4 @@ Por lo tanto nos da igual que lenguaje vamos a utilizar porque siempre vamos a d
 
 Ahora viene lo que si tendriamos que tener en cuenta, que es la parte del runtime.y ¿porque?. Pues porque cada runtime esta creado para crear un codigo que solo entiende un sistema operativo específico.
 
+Por lo tanto, es aqui cuando debemos de tener pensar en que sistema operativo queremos que se ejecute el programa, y entonces elegir el sdk que integre ese runtime especifico
