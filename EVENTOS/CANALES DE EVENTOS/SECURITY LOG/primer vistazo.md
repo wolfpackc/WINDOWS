@@ -1,2 +1,3 @@
 esta preinstalado
 s
+d
