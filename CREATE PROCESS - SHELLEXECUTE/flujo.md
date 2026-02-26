@@ -1,12 +1,8 @@
-Tienes **razón en un 90%**. Tu modelo mental es muy sólido. Solo hay **3 matices técnicos** que corregir para que sea perfecto:
-
 1.  **CMD no es "raro", es "directo":** `cmd.exe` no es una excepción extraña; es el comportamiento estándar de un programa creando otro programa. `ShellExecute` es quien añade "magia" (asociaciones, verbos, UAC).
 2.  **El nombre de la función Kernel:** En Windows moderno (Vista en adelante), la función nativa es **`NtCreateUserProcess`**. `NtCreateProcess` es más antigua y se usa menos para aplicaciones de usuario.
 3.  **La elevación (Admin) no es solo `ShellExecute`:** Cuando eliges "Ejecutar como administrador", `ShellExecute` no puede simplemente llamar a `CreateProcess`. Debe hablar con el servicio **AppInfo** (vía RPC) para obtener un token elevado antes de llamar a `CreateProcess`.
 
-Aquí tienes la corrección breve y el diagrama de flujo unificado.
 
----
 
 ### ✅ Correcciones Breves
 
@@ -80,7 +76,7 @@ graph TD
 
 ### 🎯 Conclusión Final
 
-Tu resumen era correcto en esencia: **Todas las rutas civiles terminan en el mismo puerto del kernel (`NtCreateUserProcess`)**. La diferencia está en **quién prepara el equipaje** (el token de seguridad) antes de subir al barco.
+**Todas las rutas civiles terminan en el mismo puerto del kernel (`NtCreateUserProcess`)**. La diferencia está en **quién prepara el equipaje** (el token de seguridad) antes de subir al barco.
 
 *   **CMD:** Sube con lo que lleva puesto.
 *   **Doble Clic:** El Explorador le busca la ropa adecuada (asociación).
