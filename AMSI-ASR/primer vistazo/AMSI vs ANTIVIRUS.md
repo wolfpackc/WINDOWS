@@ -4,6 +4,7 @@
  ---
  ---
  
+ 
  **AMSI actúa como un puente** que toma contenido dinámico (scripts, macros, comandos en memoria, etc.) y lo envía a un motor antimalware para que lo analice.
 
  ---
