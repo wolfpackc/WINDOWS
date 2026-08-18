@@ -1,5 +1,5 @@
 # Token Stealing en Windows
-
+x
 ## Objetivo general
 
 En los escenarios estudiados, el objetivo habitual es conseguir ejecutar un proceso con un token asociado a:
