@@ -30,7 +30,9 @@ La idea es sencilla: **vamos directamente a buscar un token SYSTEM que ya existe
 
 ### 2. Técnicas Potato
 
-Potato parte normalmente de una situación diferente: el proceso **no dispone de `SeDebugPrivilege`**, pero su token contiene **`SeImpersonatePrivilege`**. Esto es común en determinados servicios y cuentas de servicio.
+
+
+Potato parte normalmente de una situación diferente: el proceso **no dispone de `SeDebugPrivilege`**, pero su token contiene **`SeImpersonatePrivilege`**. Esto es común en determinados servicios y cuentas de servicio, aunque tambien en cmd como admin.
 
 ```text
 Proceso/cuenta de servicio limitada
@@ -112,7 +114,7 @@ En kernel mode, en cambio, el enfoque estudiado consiste en acceder directamente
 ## Lo confirmado con GodPotato en el laboratorio
 
 La práctica con GodPotato confirmó el modelo teórico: partiendo de **`NT AUTHORITY\NETWORK SERVICE` / Servicio de red**, la herramienta creó un endpoint controlado, utilizó RPC/DCOM para conseguir una conexión privilegiada, realizó impersonación, encontró un token SYSTEM utilizable y creó un nuevo proceso bajo `NT AUTHORITY\SYSTEM`.
-
+<img width="845" height="601" alt="image" src="https://github.com/user-attachments/assets/e81d9521-49ac-4792-b378-1652de328823" />
 El log observado seguía esencialmente este flujo:
 
 ```text
