@@ -1,94 +1,156 @@
-# Token Stealing con técnicas Potato — conclusiones
+# Token Stealing — Potato: conclusiones
 
-El objetivo final de una técnica Potato suele ser **conseguir ejecutar un proceso con la identidad `NT AUTHORITY\SYSTEM`**. La característica importante es que normalmente no partimos de `SeDebugPrivilege`, como en un robo directo de tokens, sino de un proceso cuyo token contiene **`SeImpersonatePrivilege`**.
+## Idea principal
 
-## 1. Qué cambia entre las distintas Potato
+El objetivo habitual de estas técnicas es **ejecutar un proceso como `NT AUTHORITY\SYSTEM`**, uno de los contextos más privilegiados de Windows en modo usuario.
 
-La fase inicial depende de la variante Potato utilizada. JuicyPotato, PrintSpoofer, GodPotato y otras variantes emplean mecanismos diferentes para conseguir que un componente privilegiado de Windows se conecte o autentique contra un endpoint controlado por el proceso atacante.
+Hay dos caminos conceptuales distintos para llegar a ese resultado:
 
-Lo que cambia principalmente entre variantes es **cómo se consigue esa conexión privilegiada**.
+### 1. Token stealing directo
 
-Una vez que el cliente privilegiado se ha conectado, comienza la fase de impersonación.
-
-## 2. Flujo conceptual
+Parte normalmente de un proceso elevado que dispone de **`SeDebugPrivilege`**.
 
 ```text
-Cliente privilegiado / SYSTEM
+Administrador elevado
         ↓
-conexión al endpoint controlado
+SeDebugPrivilege
         ↓
-ImpersonateNamedPipeClient()
+abrir un proceso SYSTEM
         ↓
-el hilo obtiene un Impersonation Token
+abrir su token
         ↓
-OpenThreadToken()
+duplicarlo como token primario
         ↓
-acceso al token de impersonación
-        ↓
-DuplicateTokenEx(..., TokenPrimary, ...)
-        ↓
-nuevo Primary Token
-con identidad SYSTEM
-        ↓
-CreateProcessAsUser()
-o CreateProcessWithTokenW()
-        ↓
-nuevo proceso
+crear un proceso con ese token
         ↓
 NT AUTHORITY\SYSTEM
 ```
 
-## 3. Qué ocurre durante la impersonación
+La idea es sencilla: **vamos directamente a buscar un token SYSTEM que ya existe**. `SeDebugPrivilege` resulta especialmente importante para superar la barrera inicial de acceso al proceso privilegiado; después se solicitan sobre el token los derechos necesarios para consultarlo o duplicarlo.
 
-Cuando se ejecuta `ImpersonateNamedPipeClient()`, el proceso **no pierde su token primario original**. Lo que ocurre es que el hilo que realiza la impersonación recibe un **Impersonation Token**, que pasa a ser su identidad efectiva para determinadas comprobaciones de seguridad.
+### 2. Técnicas Potato
 
-Por tanto:
-
-```text
-Proceso
-→ continúa teniendo su Primary Token original
-
-Hilo impersonado
-→ tiene además un Impersonation Token
-→ actúa temporalmente con la identidad del cliente
-```
-
-La impersonación afecta al hilo que está impersonando; no reemplaza automáticamente el Primary Token del proceso completo.
-
-## 4. De Impersonation Token a Primary Token
-
-El problema es que un **Impersonation Token no se utiliza directamente como token primario de un proceso nuevo**. Por eso se abre primero mediante `OpenThreadToken()` y posteriormente se utiliza `DuplicateTokenEx()` para crear una copia de tipo `TokenPrimary`.
-
-Ese nuevo Primary Token sí puede utilizarse explícitamente para crear otro proceso bajo la identidad impersonada mediante APIs como `CreateProcessAsUser()` o `CreateProcessWithTokenW()`.
-
-> **Impersonar permite que un hilo actúe temporalmente como el cliente; duplicar el token como Primary Token permite materializar esa identidad en un proceso nuevo.**
-
-## 5. Caso SYSTEM
-
-En una Potato, si el cliente impersonado es SYSTEM, el resultado final buscado es:
+Potato parte normalmente de una situación diferente: el proceso **no dispone de `SeDebugPrivilege`**, pero su token contiene **`SeImpersonatePrivilege`**. Esto es común en determinados servicios y cuentas de servicio.
 
 ```text
-Impersonation Token SYSTEM
+Proceso/cuenta de servicio limitada
         ↓
-Primary Token SYSTEM
+SeImpersonatePrivilege
         ↓
-nuevo proceso
+conseguir una conexión de un contexto privilegiado
+        ↓
+impersonar al cliente
+        ↓
+obtener un Impersonation Token SYSTEM
+        ↓
+duplicarlo como Primary Token
+        ↓
+crear un proceso
         ↓
 NT AUTHORITY\SYSTEM
 ```
 
-## 6. Conclusión final
+La forma más fácil de recordarlo es:
 
-Por tanto, la cadena final de muchas variantes Potato es conceptualmente muy parecida:
+> **Token stealing directo: voy a buscar el token de SYSTEM.**  
+> **Potato: hago que un contexto privilegiado venga hacia mí y entonces lo impersono.**
 
-1. Conseguir que un contexto privilegiado se conecte al endpoint controlado.
-2. Impersonar ese contexto privilegiado.
-3. Obtener el Impersonation Token del hilo.
-4. Duplicarlo como `TokenPrimary`.
-5. Crear un nuevo proceso utilizando ese Primary Token.
+## Qué hace realmente la impersonación
 
-Lo que suele diferenciar unas Potato de otras está principalmente en la fase anterior: **el mecanismo utilizado para conseguir que un contexto privilegiado se conecte y pueda ser impersonado**.
+Cuando un hilo impersona a un cliente, **el proceso no pierde ni sustituye su Primary Token original**. El hilo obtiene además un **Impersonation Token**, que pasa a utilizarse como su identidad efectiva para determinadas comprobaciones de seguridad.
+
+```text
+Proceso → mantiene su Primary Token original
+Hilo impersonado → usa temporalmente un Impersonation Token
+```
+
+Para crear un proceso nuevo con esa identidad, el token de impersonación puede duplicarse como **`TokenPrimary`** y utilizarse después en la creación del nuevo proceso.
+
+La conclusión importante es:
+
+> **Impersonar permite actuar temporalmente con otra identidad; duplicar ese token como Primary Token permite materializar esa identidad en un proceso nuevo.**
+
+## Por qué existen tantas variantes Potato
+
+JuicyPotato, RoguePotato, PrintSpoofer, GodPotato, JuicyPotatoNG, etc. se diferencian sobre todo en **el mecanismo empleado para provocar la conexión o autenticación privilegiada inicial**: named pipes, RPC, DCOM, Spooler u otros componentes.
+
+La parte final es conceptualmente muy parecida:
+
+```text
+conexión privilegiada
+        ↓
+impersonación
+        ↓
+token SYSTEM
+        ↓
+duplicación como Primary Token
+        ↓
+proceso SYSTEM
+```
+
+## Cuentas de servicio
+
+Una **cuenta de servicio** es una identidad utilizada por servicios o aplicaciones de Windows, no necesariamente por una persona interactiva. No todas son SYSTEM ni tienen el mismo nivel de privilegio.
+
+Ejemplos típicos:
+
+- `LOCAL SERVICE`: relativamente limitada.
+- `NETWORK SERVICE`: relativamente limitada y capaz de autenticarse en red como el equipo en determinados contextos.
+- cuentas específicas de IIS, SQL Server, agentes, backups, etc.
+- `NT AUTHORITY\SYSTEM`: extremadamente privilegiada localmente.
+
+El escenario interesante para Potato es precisamente una **cuenta de servicio limitada que posea `SeImpersonatePrivilege`**. Si ya estamos ejecutando como SYSTEM, la escalada local a SYSTEM deja de tener sentido porque el objetivo ya se ha alcanzado.
+
+Además, Potato **no concede `SeImpersonatePrivilege`**. El ejecutable debe comenzar bajo un proceso cuyo token ya contenga ese privilegio. Si un servicio vulnerable ejecuta código o crea un proceso hijo, ese proceso puede heredar el contexto de seguridad del servicio y convertirse en el punto de partida de Potato.
+
+## User mode frente a kernel mode
+
+Las técnicas Potato son **user mode (Ring 3)**. Trabajan mediante tokens, handles, impersonación y APIs de Windows; **no modifican directamente `_EPROCESS.Token` ni otras estructuras internas del kernel**.
+
+En kernel mode, en cambio, el enfoque estudiado consiste en acceder directamente a estructuras como `_EPROCESS` y modificar referencias internas al token. Es una metodología diferente aunque el objetivo final pueda ser parecido.
+
+## Lo confirmado con GodPotato en el laboratorio
+
+La práctica con GodPotato confirmó el modelo teórico: partiendo de **`NT AUTHORITY\NETWORK SERVICE` / Servicio de red**, la herramienta creó un endpoint controlado, utilizó RPC/DCOM para conseguir una conexión privilegiada, realizó impersonación, encontró un token SYSTEM utilizable y creó un nuevo proceso bajo `NT AUTHORITY\SYSTEM`.
+
+El log observado seguía esencialmente este flujo:
+
+```text
+NETWORK SERVICE
+        ↓
+endpoint / named pipe
+        ↓
+RPCSS / DCOM
+        ↓
+conexión privilegiada
+        ↓
+impersonación
+        ↓
+token SYSTEM encontrado
+        ↓
+nuevo proceso como SYSTEM
+```
+
+También quedó claro que **conseguir ejecución como SYSTEM y obtener una consola plenamente interactiva son problemas distintos**. GodPotato puede elevar correctamente y crear un proceso SYSTEM aunque la entrada/salida de la consola (`stdin/stdout/stderr`) no quede conectada de forma usable.
+
+## Conclusiones finales
+
+- El objetivo típico es alcanzar **`NT AUTHORITY\SYSTEM`**.
+- **`SeDebugPrivilege`** es la pieza clave del método directo para acceder a procesos privilegiados y posteriormente trabajar con sus tokens.
+- **`SeImpersonatePrivilege`** es la pieza clave de las Potato basadas en impersonación.
+- Un privilegio puede estar presente y deshabilitado; si está ausente del token, no puede añadirse simplemente con `AdjustTokenPrivileges`.
+- Potato no suele ser el primer paso: normalmente se utiliza **después de conseguir ejecución en un proceso o servicio cuyo token ya contiene `SeImpersonatePrivilege`**.
+- La impersonación afecta inicialmente al **hilo**, no sustituye automáticamente el Primary Token del proceso.
+- Las variantes Potato cambian principalmente en **cómo provocan la conexión privilegiada**; el tramo final de impersonación, duplicación del token y creación del proceso es similar.
+- **Potato es una técnica de user mode**, no una modificación directa de estructuras del kernel.
+- En la práctica con GodPotato se confirmó la escalada **NETWORK SERVICE → SYSTEM**; la interactividad de la shell es independiente de que la elevación haya funcionado correctamente.
 
 ### Resumen mental
 
-**Forzar una autenticación privilegiada → impersonar → obtener el token del hilo → duplicarlo como Primary Token → crear un nuevo proceso con esa identidad.**
+```text
+Método directo:
+SeDebugPrivilege → abrir proceso SYSTEM → abrir token → duplicar → proceso SYSTEM
+
+Potato:
+SeImpersonatePrivilege → provocar conexión privilegiada → impersonar → duplicar token → proceso SYSTEM
+```
