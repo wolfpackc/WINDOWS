@@ -8,6 +8,19 @@ Una característica especialmente importante de los servicios es que, al crearlo
 
 Eso explica el funcionamiento conceptual de **PsExec**. PsExec no crea un servicio para entrar en kernel mode, sino porque el SCM proporciona una forma estándar de registrar, arrancar y controlar un programa de forma remota. En el caso típico, el ejecutable que se instala en la máquina remota se registra como servicio y se configura para ejecutarse como **LocalSystem**. El SCM arranca entonces ese `servicio.exe` directamente con un token de `NT AUTHORITY\SYSTEM`; no es que el servicio robe o transforme su token en SYSTEM. Si ese proceso crea después un `cmd.exe` normalmente, el hijo se ejecutará bajo ese mismo contexto de seguridad, salvo que se indique explícitamente otro token o credenciales. Por eso PsExec puede terminar proporcionando una consola como SYSTEM: **el administrador tiene permiso para pedir al SCM que cree el servicio, el SCM lo inicia con la cuenta configurada y los procesos hijos pueden heredar ese contexto de seguridad**.
 
+Cuentas de servicio
+Una cuenta de servicio es una identidad utilizada por Windows para ejecutar servicios y procesos en segundo plano. No está pensada necesariamente para que una persona inicie sesión de forma interactiva.
+
+Ejemplos habituales:
+
+NT AUTHORITY\LOCAL SERVICE: relativamente restringida.
+NT AUTHORITY\NETWORK SERVICE: limitada localmente, aunque puede autenticarse en red usando la identidad del equipo en determinados contextos.
+NT AUTHORITY\SYSTEM / LocalSystem: extremadamente privilegiada localmente.
+cuentas específicas creadas para IIS, SQL Server, agentes, backups u otros servicios.
+Cuenta de servicio ≠ SYSTEM necesariamente.
+
+Una cuenta de servicio puede ser limitada o extremadamente privilegiada dependiendo de su identidad y del token que tenga asociado.
+
 ## Estructura
 
 - [`User-Mode-Services/`](./User-Mode-Services/) — qué es un servicio de user mode y por qué existe.
