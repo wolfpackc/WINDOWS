@@ -14,8 +14,11 @@ Eso explica el funcionamiento conceptual de **PsExec**. PsExec no crea un servic
 Ejemplos habituales:
 
 NT AUTHORITY\LOCAL SERVICE: relativamente restringida.
+
 NT AUTHORITY\NETWORK SERVICE: limitada localmente, aunque puede autenticarse en red usando la identidad del equipo en determinados contextos.
+
 NT AUTHORITY\SYSTEM / LocalSystem: extremadamente privilegiada localmente.
+
 cuentas específicas creadas para IIS, SQL Server, agentes, backups u otros servicios.
 Cuenta de servicio ≠ SYSTEM necesariamente.
 
